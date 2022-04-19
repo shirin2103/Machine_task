@@ -1,0 +1,1 @@
+jQuery.fn.button=function(t){"loading"===t&&this.data("loading-text")&&this.data("original-text",this.html()).html(this.data("loading-text")).prop("disabled",!0),"reset"===t&&this.data("original-text")&&this.html(this.data("original-text")).prop("disabled",!1)};

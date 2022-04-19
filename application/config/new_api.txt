@@ -1,0 +1,354 @@
+function get_request_from_cron_get(){   
+        $response = array('code' => - 1, 'status' => false, 'message' => '');
+        $validate = validateToken();
+        // if($validate){
+            // $ert = [];
+            // $fh = fopen('prhixdata1.txt','r');
+            // while ($data = fgets($fh)) {
+            //   // <... Do your work with the line ...>
+            //   $ert[] = $data;
+            // }
+            // fclose($fh);
+            // // $data=$this->input->post('data');
+            // $prhix_info= decrypt($ert[0]);
+            // $info_1 = json_decode($prhix_info, true);
+            // PHP program to creating two 
+            // dimensional associative array
+            // $status="Approved";
+            $info_1 = array(
+                   array(
+                    'domain' => 'PRHIX',
+                    'domain_url' => 'https://prhix.com/',
+                    'org_id' => 3,
+                    'org_email' => 'trainingorg@prhix.com',
+                    'org_name' => 'Training Org',
+                    'fk_patient_id' => '51485',
+                    'user_first_name' => 'Kevin',
+                    'user_middle_name' => 'NA',
+                    'user_last_name' => 'Frank testing',
+                    'user_email' => 'kevin.franktesting@prhix.com',
+                    'user_dob' => '04/05/1995',
+                    'user_gender' => 'Male',
+                    'user_address1' => '704 Melville Street',
+                    'user_address2' => 'Arlington, TN 38002',
+                    'user_city' => 'Arlington',
+                    'user_state' => 'CA',
+                    'user_zip' => '77007',
+                    'user_contact_no' => '788-888-8888',
+                    'provider_id' => 3,
+                    'provider_name' => 'Training Provider',
+                    'provider_email' => 'trainingprovider@prhix.com',
+                    'api_key' => 'Q%%O$1Od81tazHhZfG6a4B8Ep2Mz72UEQ7440qrK1p@fE@tJtjGd61USVv7UkYaYY8xPcc',
+                    'wallet_ref_no' => 'MaXLFuso',
+                    'bundle_id' => 'XMbPQ2Vd',
+                    'service_ref_no' => array(
+                        'anmB8QuK',
+                        'AJhNVFbw',
+                        'AHF0o43z',
+                        'aS2DZudo',
+                        'fULrRjMV',
+                    ),
+                    'service_ref_id' => array(
+                        '530',
+                        '471',
+                        '5',
+                        '2',
+                        '1',
+                    ),
+                    'total_coin' => '-7.5'
+                )
+            );
+            if (empty($info_1[0]['domain'])) {
+             $response['message'] = 'domain is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['org_id'])) {
+                $response['message'] = 'orgnization is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['fk_patient_id'])) {
+                $response['message'] = 'patient is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['provider_id'])) {
+                $response['message'] = 'provider is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['wallet_ref_no'])) {
+                $response['message'] = 'wallet is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['api_key'])) {
+                $response['message'] = 'Api key is required.';
+                $response['code'] = 201;
+            }else if (empty($info_1[0]['service_ref_id'])) {
+                $response['message'] = 'Service Refno is required.';
+                $response['code'] = 201;
+            } else if (empty($info_1[0]['total_coin'])) {
+                $response['message'] = 'Total Coin is required.';
+                $response['code'] = 201;
+            } else {
+                set_time_limit(0);
+
+                $last_requested_ids=[]; 
+                $total_service_price_prapp=[];
+                $total_service_price_mdapp=[];
+                $existing_domain_info = $this->model->selectWhereData('tbl_domain', array('domain_url' => $info_1[0]['domain_url'],'del_status' => '1'),array('id'));
+                 
+                if(empty($existing_domain_info['id'])){
+                    $insert_data = array(
+                        'domain'=>$info_1[0]['domain'],    
+                        'domain_url'=>$info_1[0]['domain_url'],                
+                    );
+                    $domain_id = $this->model->insertData('tbl_domain', $insert_data);
+                } else {
+                    $domain_id=$existing_domain_info['id'];
+                }
+                $check_exist_org_info = $this->model->selectWhereData('tbl_orgnization', array('domain_id' => $domain_id,'org_id'=>$info_1[0]['org_id'],'del_status' => '1'),array('id'));
+                if (empty($check_exist_org_info['id'])) {
+                     $insert_org_data = array(
+                        'domain_id'=>$domain_id,    
+                        'org_id'=>$info_1[0]['org_id'],       
+                        'org_name'=>$info_1[0]['org_name'],           
+                        'email_id'=>$info_1[0]['org_email'],                                  
+                    );
+                    $org_id = $this->model->insertData('tbl_orgnization', $insert_org_data);
+                } else {
+                    $org_id=$check_exist_org_info['id'];
+                }
+
+                foreach($info_1 as $info_1_key => $info_1_row){
+                    $insert_data = array(               
+                        'domain_id'=>$domain_id,   
+                        'org_id'=>$org_id,
+                        'provider_id'=>$info_1_row['provider_id'],
+                        'fk_patient_id'=>$info_1_row['fk_patient_id'],
+                        'user_first_name'=>$info_1_row['user_first_name'],
+                        'user_middle_name'=>$info_1_row['user_middle_name'],
+                        'user_last_name'=>$info_1_row['user_last_name'],                       
+                        'user_dob'=>$info_1_row['user_dob'],
+                        'send_request_status'=>'Pending',
+                        'user_contact_no'=>$info_1_row['user_contact_no'],
+                        'user_email'=>$info_1_row['user_email'],
+                        'provider_name'=>$info_1_row['provider_name'],
+                        'provider_email'=>$info_1_row['provider_email'],
+                        'bundle_id'=>$info_1_row['bundle_id'],
+                    );
+                    $last_request_inserted_id = $this->model->insertData('tbl_request', $insert_data);
+                    $last_requested_ids[] = $last_request_inserted_id;
+                    $token_data = $this->model->getprevioushash($info_1_row['org_id']);
+                    if(!empty($token_data)){
+                        $previous_hash=$token_data[0]['current_hash'];
+                        $current_hash=generate_key(70);
+                        $tokendata=$previous_hash.$previous_hash;
+                        $token=encrypt($tokendata);
+                    } else {
+                        $previous_hash='';               
+                        $current_hash=generate_key(70);
+                        $token=encrypt($current_hash);
+                    }
+                    $insert_token=array(
+                        'request_id'=>$last_request_inserted_id,
+                        'org_id'=>$org_id,
+                        'token_ref_no'=>random_strings(10),
+                        'prev_hash'=>$previous_hash,
+                        'current_hash'=>$current_hash,
+                        'token_no'=>$token,
+                        'block_name'=>'success',
+                        'api_key'=>$info_1_row['api_key'],
+                    );
+                    $token_id = $this->model->insertData('tbl_tokens',$insert_token);
+                    $total_service_price=0;
+                    $user_info = $this->model->selectWhereData('tbl_login',array('email_id'=>$info_1_row['user_email'],'user_type'=>4),array('id'));
+                    $superadmin_wallet_info = $this->model->selectWhereData('tbl_wallet',array('fk_user_id'=>1),array('total_coin','wallet_ref_no','total_rewards_coin'));
+                    $superadmin_balance_coins=$superadmin_wallet_info['total_coin'];
+                    $quantity = 3;
+                    if(empty($user_info['id'])){
+                        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                        $password =substr(str_shuffle($chars), 0, 8);
+                        $login_insert_data = array(
+                            'name'=>$info_1_row['user_first_name'].' '.$info_1_row['user_middle_name'].' '.$info_1_row['user_last_name'],   
+                            'email_id'=>$info_1_row['user_email'],    
+                            'password' => encrypt($password),
+                            'date_of_brith'=>$info_1_row['user_dob'],
+                            'gender'=>$info_1_row['user_gender'],
+                            'contact_no'=>$info_1_row['user_contact_no'],
+                            'user_type'=>'user',
+                            'submitted_from'=>'MDAPP Waiting Room',
+                            'fk_patient_id'=>$info_1_row['fk_patient_id'],
+                            'org_id'=>$info_1_row['org_id'],
+                            'domain_id'=>$domain_id,//123
+                        );
+                        $login_inserted_id = $this->model->insertData('tbl_login', $login_insert_data);
+                        $patient_wallet_ref_no=random_strings(8);
+                        $coin_price=$this->model->getcoinprice();
+                        @$total_user_coin_price=$coin_price[0]['price']*$quantity;
+                        if($superadmin_balance_coins >= $quantity){
+                            $user_transaction_insert_data = array(
+                                'transation_id'=>rand(),
+                                'fk_user_id'=>$login_inserted_id,
+                                'purchase_flag '=>2,
+                                'coin_qty'=>$quantity,        
+                                'fk_coin_price' =>$coin_price[0]['price'],
+                                'credit'=>$quantity,
+                                'wallet_ref_no'=>$patient_wallet_ref_no,
+                                'total_coins'=>$quantity,
+                                'total_micro_coins'=>$quantity*100,
+                            );
+                            $user_last_transaction_id=$this->model->insertData('tbl_transactions',$user_transaction_insert_data);
+                            $insert_user_wallet_data = array(
+                                'wallet_ref_no'=>$patient_wallet_ref_no,
+                                'fk_user_id'=>$login_inserted_id,
+                                'transaction_id'=>$user_last_transaction_id,
+                                'total_coin'=>$quantity,
+                                'total_hlx_micro_coins'=>$quantity*100,
+                            );
+                            $this->model->insertData('tbl_wallet',$insert_user_wallet_data);
+                            $superadmin_current_balance = $superadmin_wallet_info['total_coin']-$quantity;
+                            $superadmin_reward_balance = $superadmin_wallet_info['total_rewards_coin'];
+                            $superadmin_transaction_insert_data = array(
+                                'transation_id'=>rand(),
+                                'fk_user_id'=>1,
+                                'purchase_flag '=>2,
+                                'coin_qty'=>$quantity,        
+                                'fk_coin_price' =>$coin_price[0]['price'],
+                                'debit'=>$quantity,
+                                'wallet_ref_no'=>$superadmin_wallet_info['wallet_ref_no'],
+                                'total_coins'=>$superadmin_current_balance,
+                                'total_micro_coins'=>$superadmin_current_balance*100,
+                                'total_reward_coins'=>$superadmin_reward_balance,
+                                'total_reward_micro_coins'=>$superadmin_reward_balance*100,
+                            );
+                            $supradmin_last_transaction_id=$this->model->insertData('tbl_transactions',$superadmin_transaction_insert_data);
+                            $update_superadmin_wallet_data = array(
+                                'transaction_id'=>$supradmin_last_transaction_id,
+                                'total_coin'=>$quantity,
+                                'total_hlx_micro_coins'=>$quantity*100,
+                            );
+                            $this->model->updateData('tbl_wallet',$update_superadmin_wallet_data,array('fk_user_id'=>1));
+                        }
+                    }
+                    foreach($info_1_row['service_ref_no'] as $info_1_row_key => $info_1_row_value){
+                        $service_price_info = $this->common_model->get_service_price_by_service_ref_no($info_1_row_value,$info_1_row['service_ref_id'][$info_1_row_key],$domain_id,$org_id);
+
+                        $service_price_mdapp = $this->common_model->get_service_price_by_service_ref_no($info_1_row_value,$info_1_row['service_ref_id'][$info_1_row_key],3,98);
+                        if(empty($service_price['price'])){
+                            $service_price['price'] = 0.1;
+                        } 
+                        if(empty($service_price_mdapp['price'])){
+                            $service_price_mdapp['price'] = 0.1;
+                        }
+                        $total_service_price=$service_price['price'];
+                        $total_service_price_prapp[] = $service_price['price'];
+                        $total_service_price_mdapp[]=$service_price['price']; 
+                        $wallet_org_data = $this->model->selectWhereData('tbl_wallet',array('org_id'=>$org_id,'wallet_ref_no' =>$info_1[0]['wallet_ref_no']),array('total_coin','wallet_ref_no','total_rewards_coin','fk_user_id'));
+                        $business_user_id = $wallet_org_data['fk_user_id'];
+                        $business_reward_info = $this->model->selectWhereData('tbl_rewards',array('fk_user_id'=>$business_user_id,'user_type'=>3,'del_status'=>'1','status'=>'1'),array('rewards'));
+                        if(!empty($business_reward_info['rewards'])){
+                            $business_reward_percentage = $business_reward_info['rewards'];
+                        } else {
+                            $business_reward_percentage = 0;
+                        }
+                        $add_reward_business_coins =  @$service_price['price']*$business_reward_percentage/100;
+                        $business_reward_coin_2 = $wallet_org_data['total_rewards_coin'] + $add_reward_business_coins;
+                        $org_current_balance=$wallet_org_data['total_coin']-$service_price['price'];
+                        $org_current_micro_balance = $org_current_balance*100;
+                        $org_balance_reward_coin = $business_reward_coin_2;
+                        $org_reward_micro_coins = $business_reward_coin_2*100;
+                        $org_transaction_insert_data = array(
+                            'transation_id'=>rand(),   
+                            'domain'=> $domain_id,    
+                            'org_id' => $org_id, 
+                            'request_id' =>$last_request_inserted_id,
+                            'service_id' =>$info_1_row['service_ref_id'][$info_1_row_key],
+                            'coin_qty'=>$total_service_price,                     
+                            'debit'=>$total_service_price,
+                            'wallet_ref_no'=>$info_1_row['wallet_ref_no'],
+                            'debit_coin_qnty'=>$total_service_price,
+                            'purchase_flag'=>10,
+                            'total_coins'=>$org_current_balance,
+                            'total_micro_coins'=>$org_current_micro_balance,
+                            'total_reward_coins'=>$org_balance_reward_coin,
+                            'total_reward_micro_coins'=>$org_reward_micro_coins,
+                        );
+                        $last_org_transation_id = $this->model->insertData('tbl_transactions', $org_transaction_insert_data);   
+                        $update_org_wallet_data = array(
+                            'transaction_id'=>$last_org_transation_id,
+                            'total_coin'=> $org_current_balance,
+                            'total_hlx_micro_coins'=>$org_current_micro_balance,
+                            'reward_transaction_id'=>$last_org_transation_id,
+                            'total_rewards_coin'=>$org_balance_reward_coin,
+                            'total_zhlx_micro_coins'=>$org_balance_reward_coin*100,
+                        );
+                        $this->model->updateData('tbl_wallet',$update_org_wallet_data,array('org_id'=>$org_id,'wallet_ref_no' =>$info_1[0]['wallet_ref_no']));
+                        $superadmin_debit_reward_info = array(
+                            'purchase_flag'=>4,
+                            'service_price'=>$service_price['price'],
+                            'request_id'=>$last_org_transation_id,
+                            'debit_reward_coins'=>$org_balance_reward_coin,
+                            'service_id'=>$info_1_row['service_ref_id'][$info_1_row_key],
+                        );
+                        debit_reward_coin_admin($superadmin_debit_reward_info);
+                        $service_provider_wallet_info = $this->model->selectWhereData('tbl_wallet',array('fk_user_id'=>@$service_price_info['fk_user_id']),array('total_coin','wallet_ref_no','total_rewards_coin'));
+                        $admin_reward_info = $this->model->selectWhereData('tbl_rewards',array('user_type'=>1,'del_status'=>'1','status'=>'1'),array('rewards'));
+                        $service_provider_reward_percentage =0;
+                        if(empty($service_price_info['fk_user_id'])){
+                            $service_price_info['fk_user_id'] = 25;
+                        }
+                        $servic_provider_user_type_info = $this->model->selectWhereData('tbl_login',array('id'=>$service_price_info['fk_user_id'],'del_status'=>'1','status'=>'1'),array('user_type'));
+                        if($servic_provider_user_type_info['user_type']==1){
+                            $service_provider_reward_info = $admin_reward_info;
+                        } else {
+                            $service_provider_reward_info = $this->model->selectWhereData('tbl_rewards',array('fk_user_id'=>$info_1_row['service_ref_id'][$info_1_row_key],'user_type'=>$servic_provider_user_type_info['user_type'],'del_status'=>'1','status'=>'1'),array('rewards'));
+                        }
+                        if(!empty($service_provider_reward_info['rewards'])){
+                            $service_provider_reward_info = $service_provider_reward_info['rewards'];
+                        }
+                        $reward_service_provider_coins = $service_provider_wallet_info['total_rewards_coin'];
+                        $service_provider_balance_coin_1 = $service_provider_wallet_info['total_coin'];
+                        $service_provider_balance_reward_coin_1 = $service_provider_wallet_info['total_rewards_coin'];
+                        $service_provider_current_balance = $service_provider_balance_coin_1+$service_price['price'];
+                        $service_provider_current_micro_balance = $service_provider_current_balance*100;
+                        $add_reward_service_provider_coins =  @$service_price['price']*$service_provider_reward_percentage/100;
+                        $service_provider_balance_reward_coin_2 = $service_provider_balance_reward_coin_1 + $add_reward_service_provider_coins;
+                        $reward_service_provider_micro_coins = $service_provider_balance_reward_coin_2*100;
+                        $insert_service_provider_transaction_data = array(
+                            'transation_id'=>rand(),
+                            'fk_user_id'=>$service_price['price'],
+                            'purchase_flag '=>10,
+                            'coin_qty'=>$service_price['price'],    
+                            'service_id'=>@$service_id_row,
+                            'request_id'=>$last_request_inserted_id,
+                            'credit'=>$service_price['price'],
+                            'credit_reward_coins'=>$add_reward_service_provider_coins,
+                            'wallet_ref_no'=>$service_provider_wallet_info['wallet_ref_no'],
+                            'total_coins'=>$service_provider_current_balance,
+                            'total_micro_coins'=>$service_provider_current_micro_balance,
+                            'total_reward_coins'=>$service_provider_balance_reward_coin_2,
+                            'total_reward_micro_coins'=>$reward_service_provider_micro_coins,
+                        );
+                        $service_provider_transation_id = $this->model->insertData('tbl_transactions', $insert_service_provider_transaction_data);
+                        $update_service_provider_wallet_data = array(
+                            'transaction_id'=>$service_provider_transation_id,
+                            'total_coin'=> @$user_current_balance,
+                            'total_hlx_micro_coins'=>@$user_current_micro_balance,
+                            'reward_transaction_id'=>$service_provider_transation_id,
+                            'total_rewards_coin'=>@$service_provider_balance_reward_coin_2,
+                            'total_zhlx_micro_coins'=>$reward_service_provider_micro_coins,
+                        );
+                        $update_service_provider_coin = $this->model->updateData('tbl_wallet', $update_service_provider_wallet_data, array('fk_user_id'=>$service_price_info['fk_user_id']));
+                        $superadmin_debit_reward_info = array(
+                            'purchase_flag'=>4,
+                            'service_price'=>$service_price['price'],
+                            'request_id'=>$last_request_inserted_id,
+                            'debit_reward_coins'=>@$service_provider_balance_reward_coin_2,
+                            'service_id'=>$info_1_row['service_ref_id'][$info_1_row_key],
+                        );
+                        debit_reward_coin_admin($superadmin_debit_reward_info);
+                    }
+                }
+                $response['code'] = REST_Controller::HTTP_OK;;
+                $response['status'] = true;
+                $response['message'] = 'Success';
+            }
+        // } else{
+        //     $response['message'] = 'Invalid Request';
+        //     $response['code'] = 204;
+        // }
+        echo json_encode($response);
+    }  
